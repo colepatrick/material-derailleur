@@ -9,6 +9,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import os from 'os';
 
 import donorRouter from './routes/donorRoutes';
 import programRouter from './routes/programRoutes';
@@ -22,11 +23,25 @@ dotenv.config(); // Load environment variables
 const prisma = new PrismaClient(); // Initialize Prisma Client
 const app = express();
 
-// CORS – allow frontend dev server for remote access
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+// Acquire local IP
+const localIP =
+    Object.values(os.networkInterfaces())
+        .flat()
+        .find(i => i?.family === 'IPv4' && !i.internal)?.address ?? null;
+
+process.env.FRONTEND_URL = 'http://' + localIP + ':3000/';
+
+// CORS – allow frontend dev server for remote access from .env AND automatically acquire ip
+const allowedOrigins = (
+    process.env.CORS_ALLOWED_ORIGINS ||
+    'http://localhost:3000' ||
+    ''
+)
     .split(',')
     .map(origin => origin.trim())
     .filter(Boolean);
+
+allowedOrigins.push('http://' + localIP + ':3000');
 
 app.use(
     cors({
