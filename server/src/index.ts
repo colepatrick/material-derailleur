@@ -7,6 +7,7 @@ import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
+import https from 'https';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
@@ -116,10 +117,15 @@ const startServer = async () => {
 
         const port = Number(process.env.PORT || 5000);
 
-        app.listen(port, () => {
-            console.log(
-                `[${timestamp}] Server running on http://localhost:${port}`,
-            );
+        // read SSL files
+        const sslOptions = {
+            key: fs.readFileSync(process.env.SSL_KEY_FILE!),
+            cert: fs.readFileSync(process.env.SSL_CRT_FILE!),
+        };
+
+        // create HTTPS server
+        https.createServer(sslOptions, app).listen(port, () => {
+            console.log(`[${timestamp}] HTTPS server running on https://localhost:${port}`);
         });
     } catch (error) {
         console.error('Error connecting to the database:', error);

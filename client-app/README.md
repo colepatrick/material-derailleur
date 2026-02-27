@@ -19,8 +19,17 @@ To navigate to the server directory where your backend files reside, run:
 Create a `.env` file and define the necessary environment variables:
 
 ```plaintext
-REACT_APP_BACKEND_API_BASE_URL="http://localhost:5000/"
+REACT_APP_BACKEND_API_BASE_URL="https://localhost:5000/"
+
+SSL_CRT_FILE=./certs/localhost.pem
+SSL_KEY_FILE=./certs/localhost-key.pem
 ```
+
+For SSL certification on local development testing, 
+1. Install mkcert
+2. Run ```mkcert -install``
+3. Run ```mkcert localhost``
+4. Place the resulting localhost-key.pem and localhost.pem into the server/certs folder
 
 ### 3. Install Dependencies
 
@@ -36,7 +45,7 @@ Run the following command to start the app in development mode:
 
     npm start
 
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser. The page will reload if you make edits. You may also see any lint errors in the console.
+Open [http://localhost:3000](https://localhost:3000) to view it in your browser. The page will reload if you make edits. You may also see any lint errors in the console.
 
 ### 5. Running Tests
 

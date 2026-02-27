@@ -53,7 +53,10 @@ SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER="enter your gmail"
 SMTP_PASS="enter you App password"
-FRONTEND_URL="http://localhost:3000/"
+FRONTEND_URL="https://localhost:3000/"
+
+SSL_CRT_FILE=./certs/localhost.pem
+SSL_KEY_FILE=./certs/localhost-key.pem
 ```
 
 Replace `username`, `password`, and `dbname` with your PostgreSQL username, password, and the name of the database you created.
@@ -61,6 +64,12 @@ Replace `username`, `password`, and `dbname` with your PostgreSQL username, pass
 Replace `SMTP_USER` with you regular gmail 
 
 Replace `SMTP_PASS` with your App password which is not you regular gmail password
+
+For SSL certification on local development testing, 
+1. Install mkcert
+2. Run ```mkcert -install``
+3. Run ```mkcert localhost``
+4. Place the resulting localhost-key.pem and localhost.pem into the server/certs folder
 
 Steps to Generate an App Password for Gmail
 
@@ -116,7 +125,7 @@ This command starts the server using `nodemon`, which will automatically restart
 
 Once the server is running, it will be accessible at:
 
-    http://localhost:5000
+    https://localhost:5000
 
 You can access your API endpoints via this URL using a web browser or tools like Postman for testing API requests.
 
