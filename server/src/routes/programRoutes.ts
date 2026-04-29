@@ -90,6 +90,12 @@ router.post(
                 console.warn(
                     'There are no active admins. It will not be possible to approve anyone until an active admin is created.',
                 );
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        status: 'ACTIVE',
+                    },
+                });
             }
 
             return res.status(201).json({
