@@ -61,9 +61,6 @@ router.post(
                     role: 'ADMIN',
                     status: 'PENDING',
                 },
-                select: {
-                    id: true,
-                },
             });
 
             // Find all active admins
