@@ -53,6 +53,7 @@ SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER="enter your gmail"
 SMTP_PASS="enter you App password"
+CORS_ALLOWED_ORIGINS="http://localhost:3000,http://internal_ip:3000"
 FRONTEND_URL="http://localhost:3000/"
 ```
 
@@ -61,6 +62,8 @@ Replace `username`, `password`, and `dbname` with your PostgreSQL username, pass
 Replace `SMTP_USER` with you regular gmail 
 
 Replace `SMTP_PASS` with your App password which is not you regular gmail password
+
+Replace `internal_ip` with your internal ip (IPV4 address based on ```ipconfig``` command)
 
 Steps to Generate an App Password for Gmail
 
