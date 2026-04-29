@@ -55,6 +55,7 @@ function App() {
                 <Navbar />
                 <main style={{ flex: '1 0 auto' }}>
                     <Routes>
+                        <Route path="*" element={<Home />} />
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<Register />} />
