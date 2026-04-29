@@ -8,6 +8,7 @@
         "dev": "nodemon src/index.ts",
         "dev:docker": "./node_modules/.bin/prisma migrate dev && nodemon src/index.ts",
         "build": "tsc",
+        "postbuild": "node ./scripts/copy-generated.js",
         "test": "jest"
     },
     "keywords": [],
