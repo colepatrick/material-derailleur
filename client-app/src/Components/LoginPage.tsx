@@ -223,6 +223,7 @@ const LoginPage: React.FC = () => {
                             placeholder="Enter your password"
                             value={credentials.password}
                             onChange={onChange}
+                            autoComplete="current-password"
                             required
                         />
                         <button
