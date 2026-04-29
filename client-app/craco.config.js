@@ -26,6 +26,11 @@ module.exports = {
                 ),
             );
 
+            webpackConfig.ignoreWarnings = [
+                ...(webpackConfig.ignoreWarnings || []),
+                /Critical dependency: the request of a dependency is an expression/,
+            ];
+
             return webpackConfig;
         },
     },
