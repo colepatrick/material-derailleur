@@ -55,78 +55,12 @@ jobs:
         with:
           node-version: '24.x'
 
-      - name: Install backend dependencies
-        run: npm ci
-
-      - name: Detect runner public IP
-        id: runner-ip
-        run: |
-          echo "ip=$(curl -s https://api.ipify.org)" >> "$GITHUB_OUTPUT"
-
-      - name: Validate required workflow variables
-        run: |
-          if [ -z "${{ vars.AZURE_RESOURCE_GROUP }}" ]; then
-            echo "Missing repo variable: AZURE_RESOURCE_GROUP"
-            exit 1
-          fi
-          if [ -z "${{ vars.AZURE_POSTGRES_SERVER }}" ]; then
-            echo "Missing repo variable: AZURE_POSTGRES_SERVER"
-            exit 1
-          fi
-          if [ -z "${{ vars.DATABASE_URL }}" ]; then
-            echo "Missing repo secret: DATABASE_URL"
-            exit 1
-          fi
-
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5F282CBC3A09461F8D65EAB3A978B20F }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_64EEC2AE724F4FAEA835D489356F6642 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_42AF7E7039F440A280463014FD137194 }}
-
-      - name: Allow runner IP on Azure PostgreSQL firewall
-        run: |
-          RULE_NAME="gha-${{ github.run_id }}"
-          SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER }}"
-          RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP }}"
-          RUNNER_IP="${{ steps.runner-ip.outputs.ip }}"
-
-          az postgres flexible-server firewall-rule create \
-            --resource-group "$RESOURCE_GROUP" \
-            --server-name "$SERVER_NAME" \
-            --name "$RULE_NAME" \
-            --start-ip-address "$RUNNER_IP" \
-            --end-ip-address "$RUNNER_IP" \
-          || az postgres flexible-server firewall-rule create \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$SERVER_NAME" \
-            --rule-name "$RULE_NAME" \
-            --start-ip-address "$RUNNER_IP" \
-            --end-ip-address "$RUNNER_IP"
-
-      - name: Run Prisma migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ vars.DATABASE_URL }}
-
-      - name: Remove runner IP firewall rule
-        if: always()
-        run: |
-          RULE_NAME="gha-${{ github.run_id }}"
-          SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER }}"
-          RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP }}"
-
-          az postgres flexible-server firewall-rule delete \
-            --resource-group "$RESOURCE_GROUP" \
-            --server-name "$SERVER_NAME" \
-            --name "$RULE_NAME" \
-            --yes \
-          || az postgres flexible-server firewall-rule delete \
-            --resource-group "$RESOURCE_GROUP" \
-            --name "$SERVER_NAME" \
-            --rule-name "$RULE_NAME" \
-            --yes
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
