@@ -64,5 +64,4 @@ jobs:
           app-name: 'material-derailleur'
           slot-name: 'Production'
           package: server
-          enable-oryx-build: false
           
