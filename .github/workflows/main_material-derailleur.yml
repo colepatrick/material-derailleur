@@ -64,4 +64,6 @@ jobs:
           app-name: 'material-derailleur'
           slot-name: 'Production'
           package: .
+          startup-command: 'node node_modules/prisma/build/index.js migrate deploy && npm start'
+
           
