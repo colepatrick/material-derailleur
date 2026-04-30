@@ -39,10 +39,6 @@ app.use(
     }),
 );
 
-// View engine (if you actually use Pug views)
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
 // Standard middlewares
 app.use(logger('dev'));
 app.use(express.json());
@@ -90,17 +86,7 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
         return;
     }
 
-    res.status(status);
-    if (typeof res.render === 'function' && req.app.get('views')) {
-        try {
-            return res.render('error', { message: err.message, error: err });
-        } catch (renderErr) {
-            // eslint-disable-next-line no-console
-            console.error('Error rendering error view:', renderErr);
-        }
-    }
-
-    res.send(`${status} - ${err.message}`);
+    res.status(status).send(`${status} - ${err.message}`);
 });
 
 // ---- Server startup + Prisma wiring ----
