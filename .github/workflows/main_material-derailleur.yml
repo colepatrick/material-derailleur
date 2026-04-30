@@ -63,6 +63,21 @@ jobs:
         run: |
           echo "ip=$(curl -s https://api.ipify.org)" >> "$GITHUB_OUTPUT"
 
+      - name: Validate required workflow variables
+        run: |
+          if [ -z "${{ vars.AZURE_RESOURCE_GROUP }}" ]; then
+            echo "Missing repo variable: AZURE_RESOURCE_GROUP"
+            exit 1
+          fi
+          if [ -z "${{ vars.AZURE_POSTGRES_SERVER }}" ]; then
+            echo "Missing repo variable: AZURE_POSTGRES_SERVER"
+            exit 1
+          fi
+          if [ -z "${{ vars.DATABASE_URL }}" ]; then
+            echo "Missing repo secret: DATABASE_URL"
+            exit 1
+          fi
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -74,8 +89,8 @@ jobs:
         run: |
           az postgres flexible-server firewall-rule create \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --name "${{ vars.AZURE_POSTGRES_SERVER }}" \
-            --rule-name "gha-${{ github.run_id }}" \
+            --server-name "${{ vars.AZURE_POSTGRES_SERVER }}" \
+            --name "gha-${{ github.run_id }}" \
             --start-ip-address "${{ steps.runner-ip.outputs.ip }}" \
             --end-ip-address "${{ steps.runner-ip.outputs.ip }}"
 
@@ -89,8 +104,8 @@ jobs:
         run: |
           az postgres flexible-server firewall-rule delete \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --name "${{ vars.AZURE_POSTGRES_SERVER }}" \
-            --rule-name "gha-${{ github.run_id }}" \
+            --server-name "${{ vars.AZURE_POSTGRES_SERVER }}" \
+            --name "gha-${{ github.run_id }}" \
             --yes
 
       - name: 'Deploy to Azure Web App'
