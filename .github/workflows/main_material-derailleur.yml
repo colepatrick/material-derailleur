@@ -87,12 +87,23 @@ jobs:
 
       - name: Allow runner IP on Azure PostgreSQL firewall
         run: |
+          RULE_NAME="gha-${{ github.run_id }}"
+          SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER }}"
+          RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP }}"
+          RUNNER_IP="${{ steps.runner-ip.outputs.ip }}"
+
           az postgres flexible-server firewall-rule create \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --server-name "${{ vars.AZURE_POSTGRES_SERVER }}" \
-            --name "gha-${{ github.run_id }}" \
-            --start-ip-address "${{ steps.runner-ip.outputs.ip }}" \
-            --end-ip-address "${{ steps.runner-ip.outputs.ip }}"
+            --resource-group "$RESOURCE_GROUP" \
+            --server-name "$SERVER_NAME" \
+            --name "$RULE_NAME" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP" \
+          || az postgres flexible-server firewall-rule create \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$SERVER_NAME" \
+            --rule-name "$RULE_NAME" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP"
 
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
@@ -102,10 +113,19 @@ jobs:
       - name: Remove runner IP firewall rule
         if: always()
         run: |
+          RULE_NAME="gha-${{ github.run_id }}"
+          SERVER_NAME="${{ vars.AZURE_POSTGRES_SERVER }}"
+          RESOURCE_GROUP="${{ vars.AZURE_RESOURCE_GROUP }}"
+
           az postgres flexible-server firewall-rule delete \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --server-name "${{ vars.AZURE_POSTGRES_SERVER }}" \
-            --name "gha-${{ github.run_id }}" \
+            --resource-group "$RESOURCE_GROUP" \
+            --server-name "$SERVER_NAME" \
+            --name "$RULE_NAME" \
+            --yes \
+          || az postgres flexible-server firewall-rule delete \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$SERVER_NAME" \
+            --rule-name "$RULE_NAME" \
             --yes
 
       - name: 'Deploy to Azure Web App'
