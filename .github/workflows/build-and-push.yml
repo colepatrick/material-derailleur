@@ -50,6 +50,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   update-manifests:
+    if: ${{ secrets.K8S_MANIFESTS_TOKEN != '' }}
     needs: build
     runs-on: ubuntu-latest
     permissions:

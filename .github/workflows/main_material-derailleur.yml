@@ -56,7 +56,7 @@ jobs:
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ vars.DATABASE_URL }}
       
       - name: Login to Azure
         uses: azure/login@v2
