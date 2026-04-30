@@ -50,12 +50,48 @@ jobs:
         with:
           name: node-app
 
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24.x'
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Detect runner public IP
+        id: runner-ip
+        run: |
+          echo "ip=$(curl -s https://api.ipify.org)" >> "$GITHUB_OUTPUT"
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5F282CBC3A09461F8D65EAB3A978B20F }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_64EEC2AE724F4FAEA835D489356F6642 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_42AF7E7039F440A280463014FD137194 }}
+
+      - name: Allow runner IP on Azure PostgreSQL firewall
+        run: |
+          az postgres flexible-server firewall-rule create \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --name "${{ vars.AZURE_POSTGRES_SERVER }}" \
+            --rule-name "gha-${{ github.run_id }}" \
+            --start-ip-address "${{ steps.runner-ip.outputs.ip }}" \
+            --end-ip-address "${{ steps.runner-ip.outputs.ip }}"
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ vars.DATABASE_URL }}
+
+      - name: Remove runner IP firewall rule
+        if: always()
+        run: |
+          az postgres flexible-server firewall-rule delete \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --name "${{ vars.AZURE_POSTGRES_SERVER }}" \
+            --rule-name "gha-${{ github.run_id }}" \
+            --yes
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -64,6 +100,6 @@ jobs:
           app-name: 'material-derailleur'
           slot-name: 'Production'
           package: .
-          startup-command: 'node node_modules/prisma/build/index.js migrate deploy && npm start'
+          startup-command: 'npm start'
 
           
