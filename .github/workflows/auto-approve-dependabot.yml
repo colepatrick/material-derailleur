@@ -6,7 +6,8 @@ on:
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
+  id-token: write
 
 jobs:
   approve:
@@ -19,4 +20,5 @@ jobs:
       - name: Auto-approve PR
         uses: hmarr/auto-approve-action@v4.0.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+         github-token: ${{ secrets.GITHUB_TOKEN }}
+      
